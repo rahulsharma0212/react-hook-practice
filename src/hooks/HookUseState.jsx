@@ -9,7 +9,7 @@ const CountNumber = () => {
         setCount(count + 1);
       }}
     >
-      you pressed me {count} times
+      you pressed me { count} times
     </button>
   );
 };
