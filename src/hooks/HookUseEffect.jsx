@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StyleBox from "../common/StyleBox";
+import { FadeInAnimation } from "../script/animation";
 
 function createConnection(serverUrl, roomId) {
   return {
@@ -88,6 +89,79 @@ const ListenGlobalHandler = () => {
   );
 };
 
+const Welcome = () => {
+  const headingRef = useRef();
+
+  useEffect(() => {
+    const animation = new FadeInAnimation(headingRef.current);
+    animation.start(1000);
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <h1
+      ref={headingRef}
+      style={{
+        opacity: 0,
+        color: "white",
+        padding: 50,
+        textAlign: "center",
+        fontSize: 50,
+        backgroundImage:
+          "radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%)",
+      }}
+    >
+      Welcome
+    </h1>
+  );
+};
+
+const TrigerAnimation = () => {
+  const [show, setShow] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setShow((e) => !e)}>
+        {!show ? "show" : "hide"}
+      </button>
+      {show && <Welcome />}
+    </>
+  );
+};
+
+const ModalDialog = ({ isOpen, children }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const modal = ref.current;
+    if (isOpen) {
+      modal.showModal();
+    }
+    return () => {
+      modal.close();
+    };
+  }, [isOpen]);
+  return <dialog ref={ref}>{children}</dialog>;
+};
+
+const ControlModal = () => {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => {
+          setShow((e) => !e);
+        }}
+      >{`${!show ? "open" : "close"} Modal`}</button>
+      <ModalDialog isOpen={show}>
+        hi there <br />
+        <button onClick={() => setShow(false)}>Hide Modal</button>
+      </ModalDialog>
+    </>
+  );
+};
+
 const HookUseEffect = () => {
   return (
     <div style={{ paddingLeft: "10px" }}>
@@ -96,6 +170,12 @@ const HookUseEffect = () => {
       </StyleBox>
       <StyleBox heading="Listening to global browser Event">
         <ListenGlobalHandler />
+      </StyleBox>
+      <StyleBox heading="Trigger an animation">
+        <TrigerAnimation />
+      </StyleBox>
+      <StyleBox heading="Controlling Modal dialog">
+        <ControlModal />
       </StyleBox>
     </div>
   );
