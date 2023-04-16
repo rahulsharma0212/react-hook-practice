@@ -294,7 +294,7 @@ const HookUseReducer = () => {
       <StyleBox heading="Passing the initializer function">
         <InitializerReducerComponent userName="Taylor" />
       </StyleBox>
-      <StyleBox heading="Passing the initializer function">
+      <StyleBox heading="Passing the initial state directly">
         <StateDirectlyComponent userName="Taylor" />
       </StyleBox>
     </div>
