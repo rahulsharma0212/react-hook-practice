@@ -1,8 +1,9 @@
 // import HookUseState from "./hooks/HookUseState";
 // import HookUseEffect from "./hooks/HookUseEffect";
 // import HookUseRef from "./hooks/HookUseRef";
+// import HookUseImperativeHandle from "./hooks/HookUseImperativeHandle";
 
-import HookUseImperativeHandle from "./hooks/HookUseImperativeHandle";
+import HookUseReducer from "./hooks/HookUseReducer";
 
 function App() {
   return (
@@ -10,7 +11,8 @@ function App() {
       {/* <HookUseState /> */}
       {/* <HookUseEffect /> */}
       {/* <HookUseRef /> */}
-      <HookUseImperativeHandle />
+      {/* <HookUseImperativeHandle /> */}
+      <HookUseReducer />
     </>
   );
 }
