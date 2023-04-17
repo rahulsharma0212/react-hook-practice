@@ -38,7 +38,7 @@ const ChatRoom = ({ roomId }) => {
   );
 };
 
-const ConnectToChatServer = () => {
+const ConnectToChatServer = ({ custom }) => {
   const [roomId, setRoomId] = useState("general");
   const [isOpen, setIsopen] = useState(false);
   return (
@@ -53,7 +53,8 @@ const ConnectToChatServer = () => {
         {isOpen ? "close" : "open"} chat
       </button>
       {isOpen && <hr />}
-      {isOpen && <ChatRoom roomId={roomId} />}
+      {isOpen && !custom && <ChatRoom roomId={roomId} />}
+      {isOpen && custom && <CustomChatRoom roomId={roomId} />}
     </>
   );
 };
@@ -162,6 +163,162 @@ const ControlModal = () => {
   );
 };
 
+const LongSection = ({ count = 20 }) => {
+  return (
+    <ul>
+      {Array.from(Array(count), (_, i) => {
+        return <li key={i}>item {`#${i}`} (keep scrolling)</li>;
+      })}
+    </ul>
+  );
+};
+
+const Box = () => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const div = ref.current;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry.isIntersecting) {
+        div.parentElement.style.backgroundColor = "#212121";
+        div.parentElement.style.color = "#fff";
+      } else {
+        div.parentElement.style.color = "#212121";
+        div.parentElement.style.backgroundColor = "#fff";
+      }
+    });
+    observer.observe(div, { threshold: 1 });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        margin: 20,
+        height: 20,
+        width: "100%",
+        border: "2px solid black",
+        backgroundColor: "orangered",
+      }}
+    />
+  );
+};
+
+const TrackingVisibility = ({ custom }) => {
+  return (
+    <div
+      style={{
+        height: "150px",
+        width: "250px",
+        border: "1px solid #212121",
+        overflowY: "scroll",
+        overflowX: "hidden",
+      }}
+    >
+      <LongSection />
+      {custom ? <CustomBox /> : <Box />}
+      <LongSection />
+      {custom ? <CustomBox /> : <Box />}
+      <LongSection />
+    </div>
+  );
+};
+
+const useChatRoom = ({ serverUrl, roomId }) => {
+  console.log("[custom hook useChatRoom]");
+  useEffect(() => {
+    const connection = new createConnection();
+    connection.connect(serverUrl, roomId);
+    return () => {
+      connection.disconnect(serverUrl, roomId);
+    };
+  }, [serverUrl, roomId]);
+};
+
+function CustomChatRoom({ roomId }) {
+  const [serverUrl, setServerUrl] = useState("http://localhost:1234");
+
+  useChatRoom({ serverUrl, roomId });
+  return (
+    <>
+      server url
+      <input
+        type="text"
+        value={serverUrl}
+        onChange={(e) => setServerUrl(e.target.value)}
+      />
+      <br />
+      <h4>{`Welcome to the ${roomId} room!`}</h4>
+    </>
+  );
+}
+
+const useWindowListener = (eventType, callback) => {
+  useEffect(() => {
+    window.addEventListener(eventType, callback);
+    return () => {
+      window.removeEventListener(eventType, callback);
+    };
+  }, [eventType, callback]);
+};
+
+const CustomGlobalHandler = () => {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  useWindowListener("pointermove", (e) => {
+    setPos({ x: e.clientX, y: e.clientY });
+  });
+
+  return <pre>{JSON.stringify(pos, null, 5)}</pre>;
+};
+
+const useIntersectionObserver = (ref) => {
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    const div = ref.current;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      setIsIntersecting(entry.isIntersecting);
+    });
+    observer.observe(div, { threshold: 1 });
+    return () => {
+      observer.disconnect();
+    };
+  }, [ref]);
+
+  return isIntersecting;
+};
+
+function CustomBox() {
+  const ref = useRef(null);
+  const isIntersecting = useIntersectionObserver(ref);
+  useEffect(() => {
+    const div = ref.current;
+    if (isIntersecting) {
+      div.parentElement.style.backgroundColor = "#212121";
+      div.parentElement.style.color = "#fff";
+    } else {
+      div.parentElement.style.color = "#212121";
+      div.parentElement.style.backgroundColor = "#fff";
+    }
+  }, [isIntersecting]);
+  return (
+    <div
+      ref={ref}
+      style={{
+        margin: 20,
+        height: 20,
+        width: "100%",
+        border: "2px solid black",
+        backgroundColor: "orangered",
+      }}
+    />
+  );
+}
+
 const HookUseEffect = () => {
   return (
     <div style={{ paddingLeft: "10px" }}>
@@ -177,7 +334,20 @@ const HookUseEffect = () => {
       <StyleBox heading="Controlling Modal dialog">
         <ControlModal />
       </StyleBox>
+      <StyleBox heading="Tracking element visibility">
+        <TrackingVisibility />
+      </StyleBox>
+      <StyleBox heading="Custom useChatRoom Hook">
+        <ConnectToChatServer custom />
+      </StyleBox>
+      <StyleBox heading="Custom useWindowListener Hook">
+        <CustomGlobalHandler />
+      </StyleBox>
+      <StyleBox heading="Custom useIntersectionObserver Hook ">
+        <TrackingVisibility custom />
+      </StyleBox>
     </div>
   );
 };
+
 export default HookUseEffect;
